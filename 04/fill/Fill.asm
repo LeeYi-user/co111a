@@ -12,3 +12,65 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+
+// int D = 8192;
+// int M[];
+//
+// loop:
+//     ;
+//
+// D = D - 1
+// M[16384 + D] = 1
+//
+// if (D > 0)
+// {
+//     goto loop;
+// }
+//
+// end:
+//    ;
+
+(KEEP_WHITE)
+
+@8192
+D = A
+
+(WHITE)
+
+D = D - 1
+@SCREEN
+A = A + D
+M = 0
+
+@WHITE
+D;JGT
+
+@KBD
+D = M
+@KEEP_WHITE
+D;JEQ
+
+// ----------
+
+(KEEP_BLACK)
+
+@8192
+D = A
+
+(BLACK)
+
+D = D - 1
+@SCREEN
+A = A + D
+M = -1
+
+@BLACK
+D;JGT
+
+@KBD
+D = M
+@KEEP_BLACK
+D;JNE
+
+@KEEP_WHITE
+0;JMP
