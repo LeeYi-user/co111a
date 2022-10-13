@@ -40,4 +40,84 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+
+    // decoder
+    Or16(a=instruction, b=false,
+         out[15]=isC,
+         out[12]=a,
+         out[11]=c1, out[10]=c2, out[9]=c3, out[8]=c4, out[7]=c5, out[6]=c6,
+         out[5]=d1, out[4]=d2, out[3]=d3,
+         out[2]=j1, out[1]=j2, out[0]=j3);
+
+    // first Mux16
+    Mux16(a=instruction, b=outALU, sel=isC, out=out1Mux16);
+
+    // ARegister
+    Not(in=isC, out=isA);
+    And(a=isC, b=d1, out=isCAndd1);
+    Or(a=isA, b=isCAndd1, out=loadARegister);
+    ARegister(in=out1Mux16, load=loadARegister, out=outARegister, out[0..14]=addressM);
+
+    // DRegister
+    And(a=isC, b=d2, out=loadDRegister);
+    DRegister(in=outALU, load=loadDRegister, out=outDRegister);
+
+    // second Mux16
+    Mux16(a=outARegister, b=inM, sel=a, out=out2Mux16);
+
+    // ALU
+    ALU(x=outDRegister, y=out2Mux16, zx=c1, nx=c2, zy=c3, ny=c4, f=c5, no=c6, out=outALU, out=outM, zr=czr, ng=cng);
+
+    // writeM
+    And(a=isC, b=d3, out=writeM);
+
+    // PC
+    Not(in=j1, out=Notj1);
+    Not(in=j2, out=Notj2);
+    Not(in=j3, out=Notj3);
+    Not(in=czr, out=Notczr);
+    Not(in=cng, out=Notcng);
+
+    // null
+    And(a=Notj1, b=Notj2, out=Notj1AndNotj2);
+    And(a=Notj1AndNotj2, b=Notj3, out=null);
+
+    // JGT
+    And(a=Notj1AndNotj2, b=j3, out=Notj1AndNotj2Andj3);
+    And(a=Notczr, b=Notcng, out=NotczrAndNotcng);
+    And(a=Notj1AndNotj2Andj3, b=NotczrAndNotcng, out=jgt);
+
+    // JEQ
+    And(a=Notj1, b=Notj3, out=Notj1AndNotj3);
+    And(a=Notj1AndNotj3, b=j2, out=Notj1Andj2AndNotj3);
+    And(a=Notj1Andj2AndNotj3, b=czr, out=jeq);
+
+    // JGE
+    And(a=j2, b=j3, out=j2Andj3);
+    And(a=Notj1, b=j2Andj3, out=Notj1Andj2Andj3);
+    And(a=Notj1Andj2Andj3, b=Notcng, out=jge);
+
+    // JLT
+    And(a=Notj2, b=Notj3, out=Notj2AndNotj3);
+    And(a=j1, b=Notj2AndNotj3, out=j1AndNotj2AndNotj3);
+    And(a=j1AndNotj2AndNotj3, b=cng, out=jlt);
+
+    // JNE
+    And(a=j1, b=j3, out=j1Andj3);
+    And(a=j1Andj3, b=Notj2, out=j1AndNotj2Andj3);
+    And(a=j1AndNotj2Andj3, b=Notczr, out=jne);
+
+    // JLE
+    And(a=j1, b=j2, out=j1Andj2);
+    And(a=j1Andj2, b=Notj3, out=j1Andj2AndNotj3);
+    Or(a=czr, b=cng, out=czrOrcng);
+    And(a=j1Andj2AndNotj3, b=czrOrcng, out=jle);
+
+    // JMP
+    And(a=j1Andj2, b=j3, out=jmp);
+
+    // PC
+    Or8Way(in[0]=false, in[1]=jgt, in[2]=jeq, in[3]=jge, in[4]=jlt, in[5]=jne, in[6]=jle, in[7]=jmp, out=jump);
+    And(a=isC, b=jump, out=loadPC);
+    PC(in=outARegister, reset=reset, load=loadPC, inc=true, out[0..14]=pc);
 }
