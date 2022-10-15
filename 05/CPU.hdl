@@ -78,11 +78,8 @@ CHIP CPU {
     Not(in=czr, out=Notczr);
     Not(in=cng, out=Notcng);
 
-    // null
-    And(a=Notj1, b=Notj2, out=Notj1AndNotj2);
-    And(a=Notj1AndNotj2, b=Notj3, out=null);
-
     // JGT
+    And(a=Notj1, b=Notj2, out=Notj1AndNotj2);
     And(a=Notj1AndNotj2, b=j3, out=Notj1AndNotj2Andj3);
     And(a=Notczr, b=Notcng, out=NotczrAndNotcng);
     And(a=Notj1AndNotj2Andj3, b=NotczrAndNotcng, out=jgt);
@@ -119,5 +116,6 @@ CHIP CPU {
     // PC
     Or8Way(in[0]=false, in[1]=jgt, in[2]=jeq, in[3]=jge, in[4]=jlt, in[5]=jne, in[6]=jle, in[7]=jmp, out=jump);
     And(a=isC, b=jump, out=loadPC);
-    PC(in=outARegister, reset=reset, load=loadPC, inc=true, out[0..14]=pc);
+    Not(in=loadPC, out=NotloadPC);
+    PC(in=outARegister, reset=reset, load=loadPC, inc=NotloadPC, out[0..14]=pc);
 }
