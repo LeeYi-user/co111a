@@ -1,4 +1,4 @@
-`include "Not.v"
+`include "gates.v"
 
 module main;
     reg in = 0;
