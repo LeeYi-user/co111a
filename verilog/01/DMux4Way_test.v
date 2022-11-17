@@ -2,7 +2,7 @@
 
 module main;
     reg in = 0;
-    reg signed[1:0] sel = 0;
+    reg[1:0] sel = 0;
     wire a, b, c, d;
 
     DMux4Way g(in, sel, a, b, c, d);

@@ -2,7 +2,7 @@
 
 module main;
     reg in = 0;
-    reg signed[2:0] sel = 0;
+    reg[2:0] sel = 0;
     wire a, b, c, d, e, f, g, h;
 
     DMux8Way g1(in, sel, a, b, c, d, e, f, g, h);
