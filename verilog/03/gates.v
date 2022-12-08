@@ -101,6 +101,16 @@ module RAM4K(input[15:0] in, input clock, load, input[11:0] address, output[15:0
     Mux8Way16 g10(R1, R2, R3, R4, R5, R6, R7, R8, address[11:9], out);
 endmodule
 */
+module RAM8K(input[15:0] in, input clock, load, input[12:0] address, output[15:0] out);
+    reg[15:0] m[0:2**13 - 1];
+
+    assign out = m[address];
+
+    always @(posedge clock) begin
+        if (load) m[address] = in;
+    end
+endmodule
+
 module RAM16K(input[15:0] in, input clock, load, input[13:0] address, output[15:0] out);
     reg[15:0] m[0:2**14 - 1];
 
