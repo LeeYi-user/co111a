@@ -35,18 +35,18 @@ def pass1(in_file):
     with open(in_file, "r") as fp:
         address = 0
         for line in fp:
-            code = line
+            code = line.split("//")[0].strip()
             if len(code) == 0:
                 continue
-            print(f"{address}: {code}")
+            print("%02d:%s" % (address, code))
             if code[0] == "(":
-                label = code[1:-2]
+                label = code[1:-1]
                 if label not in sym_map:
                     sym_map[label] = address
                 else:
-                    print("error: %s already defined before !" % label)
+                    print("error: %s already defined before !" % label, end='')
 
-                print("symbol:%s address=%d\n" % (label, address))
+                print("symbol:%s address=%d" % (label, address))
             else:
                 address += 1
 
@@ -72,7 +72,7 @@ def code2binary(code):
         try:
             address = int(code[1:])
         except:
-            symbol = code[1:].strip('\n')
+            symbol = code[1:]
             if symbol in sym_map:
                 address = sym_map[symbol]
             else:
@@ -83,12 +83,12 @@ def code2binary(code):
         return int2bin(address, 16)
     else:  # C指令
         if "=" in code:  # d=comp
-            d, comp = code.strip('\n').split("=")
+            d, comp = code.split("=")
             dcode = d_map[d]
             ccode = c_map[comp]
             return f"111{ccode}{dcode}000"
         else:  # comp;j
-            comp, j = code.strip('\n').split(";")
+            comp, j = code.split(";")
             ccode = c_map[comp]
             jcode = j_map[j]
             return f"111{ccode}000{jcode}"
@@ -99,15 +99,15 @@ def pass2(in_file, hack_file):
     with open(in_file, "r") as fp, open(hack_file, "w") as hfp:
         address = 0
         for line in fp:
-            code = line
+            code = line.split("//")[0].strip()
             if len(code) == 0:
                 continue
-            if line[0] == "(":  # 這行是符號 ex: (LOOP)
-                print(line)  # 印出該符號
+            if code[0] == "(":  # 這行是符號 ex: (LOOP)
+                print(code)  # 印出該符號
             else:
                 binary = code2binary(code)
                 b = bin2int(binary)
-                print(f"{address}: {code} \t {binary} \t {b}")
+                print("%02X: %-20s %s %04x" % (address, code, binary, b))
                 hfp.write(f"{binary}\n")  # 輸出 .hack 的二進位字串檔
                 address += 1
 
